@@ -1,1 +1,1 @@
-# vanillaJSAcademy
+# Projects from Vanilla JS Academy
