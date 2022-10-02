@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Constructor Library</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<style type="text/css">
+			body {
+				margin: 0 auto;
+				max-width: 40em;
+				width: 88%;
+			}
+		</style>
+	</head>
+	<body>
+
+		<h1>Constructor Library</h1>
+
+		<p>All of the fun here happens in the console.</p>
+
+
+		<script>
+			let stamp = (function () {
+
+				// Times in milliseconds
+				let times = {
+					hours: 1000 * 60 * 60,
+					days: 1000 * 60 * 60 * 24,
+					weeks: 1000 * 60 * 60 * 24 * 7,
+					months: 1000 * 60 * 60 * 24 * 30,
+					years: 1000 * 60 * 60 * 24 * 365
+				};
+
+				/**
+				 * Add hours to a timestamp
+				 * @param  {Integer} timestamp The timestamp
+				 * @param  {Number}  n         The number of hours to add
+				 * @return {Integer}           The new timestamp
+				 */
+				function addHours (timestamp, n = 1) {
+					return timestamp + (n * times.hours);
+				}
+
+				/**
+				 * Add days to a timestamp
+				 * @param  {Integer} timestamp The timestamp
+				 * @param  {Number}  n         The number of days to add
+				 * @return {Integer}           The new timestamp
+				 */
+				function addDays (timestamp, n = 1) {
+					return timestamp + (n * times.days);
+				}
+
+				/**
+				 * Add weeks to a timestamp
+				 * @param  {Integer} timestamp The timestamp
+				 * @param  {Number}  n         The number of weeks to add
+				 * @return {Integer}           The new timestamp
+				 */
+				function addWeeks (timestamp, n = 1) {
+					return timestamp + (n * times.weeks);
+				}
+
+				/**
+				 * Add months to a timestamp
+				 * @param  {Integer} timestamp The timestamp
+				 * @param  {Number}  n         The number of months to add
+				 * @return {Integer}           The new timestamp
+				 */
+				function addMonths (timestamp, n = 1) {
+					return timestamp + (n * times.months);
+				}
+
+				/**
+				 * Add years to a timestamp
+				 * @param  {Integer} timestamp The timestamp
+				 * @param  {Number}  n         The number of years to add
+				 * @return {Integer}           The new timestamp
+				 */
+				function addYears (timestamp, n = 1) {
+					return timestamp + (n * times.years);
+				}
+
+				/**
+				 * Get a formatted date for a timestamp
+				 * @param  {Integer} timestamp The timestamp
+				 * @param  {Object}  options   The formatting options
+				 * @return {Date}              The formatted date
+				 */
+				function getDate (timestamp, options = {}) {
+
+					// Get formatting options
+					let format = Object.assign({
+						dateStyle: 'long',
+						timeStyle: 'short',
+						hour12: true
+					}, options);
+
+					// Format the timestamp
+					return new Date(timestamp).toLocaleString(navigator.language, format);
+
+				}
+
+				return {addHours, addDays, addWeeks, addMonths, addYears, getDate};
+
+			})();
+
+			// Get a UTC timestamp for right now
+			let now = new Date().getTime();
+
+			let inAWeek = stamp.addWeeks(now);
+			let inAWeekDate = stamp.getDate(inAWeek);
+			console.log('1 week', inAWeek, inAWeekDate);
+
+			let threeYearsAgo = stamp.addYears(now, -3);
+			let threeYearsAgoDate = stamp.getDate(threeYearsAgo);
+			console.log('3 weeks ago', threeYearsAgo, threeYearsAgoDate);
+		</script>
+	</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Weather App - Options Object</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<style type="text/css">
+			body {
+				margin: 0 auto;
+				max-width: 30em;
+				text-align: center;
+				width: 88%;
+			}
+
+			p {
+				font-size: 2em;
+				margin: 0 0 0.5em;
+				padding: 0;
+			}
+		</style>
+	</head>
+	<body>
+
+		<h1>Weather App - Options Object</h1>
+
+		<div id="app">Checking the weather near you...</div>
+
+		<script>
+			/**
+			 * Get the weather
+			 * @param  {String}  apiKey   The weather API key
+			 * @param  {Boolean} showIcon If true, show the weather icon
+			 * @param  {String}  message  The message to show with the weather data
+			 * @param  {String}  units    The units to use ("M" for metric, "I" for fahrenheit, "S" for scientific)
+			 */
+			function getTheWeather (apiKey, showIcon = true, message = 'It is currently {{temp}} degrees and {{conditions}} in {{city}}, {{state}}}.', units = 'I') {
+
+				// Make sure an API key is provided
+				if (!apiKey) throw 'An API key is required.';
+
+				// Get the #app element
+				let app = document.querySelector('#app');
+
+				/**
+				 * Sanitize and encode all HTML in a user-submitted string
+				 * https://portswigger.net/web-security/cross-site-scripting/preventing
+				 * @param  {String} str  The user-submitted string
+				 * @return {String} str  The sanitized string
+				 */
+				function sanitizeHTML (str) {
+					return str.toString().replace(/javascript:/gi, '').replace(/[^\w-_. ]/gi, function (c) {
+						return `&#${c.charCodeAt(0)};`;
+					});
+				}
+
+				/**
+				 * Get the weather description
+				 * @param  {Object} weather The weather data
+				 * @return {String}         The weather description
+				 */
+				function getDescription (weather) {
+					return message.replace('{{temp}}', sanitizeHTML(weather.temp)).replace('{{conditions}}', sanitizeHTML(weather.weather.description.toLowerCase())).replace('{{city}}', sanitizeHTML(weather.city_name)).replace('{{state}}', sanitizeHTML(weather.state_code));
+				}
+
+				/**
+				 * Show an error message when unable to get the weather
+				 */
+				function noWeather () {
+					app.textContent = 'Unable to get weather data at this time.';
+				}
+
+				/**
+				 * Render the weather data into the DOM
+				 * @param  {Object} weather The weather data object
+				 */
+				function renderWeather (weather) {
+					app.innerHTML =
+						`${showIcon ? `<p>
+							<img src="https://www.weatherbit.io/static/img/icons/${sanitizeHTML(weather.weather.icon)}.png">
+						</p>` : ''}
+						<p>${getDescription(weather)}</p>`;
+				}
+
+				/**
+				 * Get weather for the user's current location
+				 * @param  {Object} position The location data
+				 */
+				function fetchWeather (position) {
+					fetch(`https://api.weatherbit.io/v2.0/current?key=${apiKey}&lat=${position.coords.latitude}&lon=${position.coords.longitude}&units=${units}`).then(function (response) {
+						if (response.ok) {
+							return response.json();
+						}
+						throw response.status;
+					}).then(function (data) {
+
+						// Pass the first weather item into a helper function to render the UI
+						renderWeather(data.data[0]);
+
+					}).catch(function (error) {
+						console.warn(error);
+						noWeather();
+					});
+				}
+
+				// Get the user's current position
+				navigator.geolocation.getCurrentPosition(fetchWeather, noWeather, {enableHighAccuracy: true});
+
+			}
+
+			// Customize the message, don't show an icon, and use metric units
+			getTheWeather('123abc', false, '{{conditions}}, {{temp}} degrees. Ick.', 'M');
+		</script>
+	</body>
+</html>

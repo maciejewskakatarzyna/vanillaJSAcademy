@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Dice - Callbacks & Events</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<style type="text/css">
+			body {
+				margin: 0 auto;
+				max-width: 40em;
+				width: 88%;
+			}
+		</style>
+	</head>
+	<body>
+
+		<h1>Dice - Callbacks & Events</h1>
+
+		<p>
+			<button id="d6">Roll a D6</button>
+			<button id="d20">Roll a D20</button>
+		</p>
+
+		<div id="result" aria-live="polite"></div>
+
+
+		<script>
+			let Dice = (function () {
+
+				/**
+				 * Randomly shuffle an array
+				 * https://stackoverflow.com/a/2450976/1293256
+				 * @param  {Array} array The array to shuffle
+				 * @return {String}      The first item in the shuffled array
+				 */
+				function shuffle (array) {
+
+					let currentIndex = array.length;
+					let temporaryValue, randomIndex;
+
+					// While there remain elements to shuffle...
+					while (0 !== currentIndex) {
+						// Pick a remaining element...
+						randomIndex = Math.floor(Math.random() * currentIndex);
+						currentIndex -= 1;
+
+						// And swap it with the current element.
+						temporaryValue = array[currentIndex];
+						array[currentIndex] = array[randomIndex];
+						array[randomIndex] = temporaryValue;
+					}
+
+					return array;
+
+				}
+
+				/**
+				 * Create the event listener
+				 * @param {Object} instance The current instantiation
+				 */
+				function createListener (instance) {
+
+					/**
+					 * Shuffles the dice array and use the first value
+					 */
+					function roll () {
+						instance.roll();
+					}
+
+					// Listen for clicks
+					instance.dice.addEventListener('click', roll);
+
+					// Return the callback function
+					return roll;
+
+				}
+
+				/**
+				 * The Constructor object
+				 * @param {String} dice    Selector for the button to roll the dice
+				 * @param {String} result  Selector for the element to render the results into
+				 * @param {Object} options Options and settings for the library
+				 */
+				function Constructor (dice, result, options = {}) {
+
+					// DOM elements
+					let diceEl = document.querySelector(dice);
+					let resultEl = document.querySelector(result);
+
+					// Make sure elements exist
+					if (!diceEl || !resultEl) throw 'Dice and result elements must be provided.';
+
+					// Merge user options into defaults
+					let {sides, message} = Object.assign({
+						sides: 6,
+						message: `You rolled a {{roll}}.`
+					}, options);
+
+					// Create properties
+					Object.defineProperties(this, {
+						dice: {value: diceEl},
+						result: {value: resultEl},
+						sides: {value: sides},
+						message: {value: message}
+					});
+
+					// Listen for clicks
+					Object.defineProperties(this, {
+						_listener: {value: createListener(this)}
+					});
+
+				}
+
+				/**
+				 * Roll the die
+				 */
+				Constructor.prototype.roll = function () {
+
+					let {sides, result, message} = this;
+
+					// Create sides of the dice
+					let sidesArr = Array.from(new Array(sides)).map(function (item, index) {
+						return index + 1;
+					});
+
+					// Roll the die
+					shuffle(sidesArr);
+					result.textContent = message.replace('{{roll}}', sidesArr[0]);
+
+				};
+
+				/**
+				 * Destroy the instance
+				 */
+				Constructor.prototype.destroy = function () {
+
+					// Get properties from the instance
+					let {dice, result, _listener} = this;
+
+					// Remove the event listener
+					dice.removeEventListener('click', _listener);
+
+					// Clear the message
+					result.textContent = '';
+
+					// Remove the roll function
+					this.roll = null;
+
+				};
+
+				return Constructor;
+
+			})();
+
+			// Create a D6
+			let d6 = new Dice('#d6', '#result', {
+				message: '{{roll}}'
+			});
+
+			// Create a D20
+			let d20 = new Dice('#d20', '#result', {
+				message: '{{roll}}',
+				sides: 20
+			});
+
+			// When you're done, you should be able to destroy an instance
+			// d20.destroy();
+		</script>
+	</body>
+</html>

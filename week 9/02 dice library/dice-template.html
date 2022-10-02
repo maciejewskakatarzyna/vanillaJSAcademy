@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Dice</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<style type="text/css">
+			body {
+				margin: 0 auto;
+				max-width: 40em;
+				width: 88%;
+			}
+		</style>
+	</head>
+	<body>
+
+		<h1>Dice</h1>
+
+		<p>
+			<button id="dice">Roll a D6</button>
+		</p>
+
+		<div id="result" aria-live="polite"></div>
+
+
+		<script>
+			// DOM elements
+			let dice = document.querySelector('#dice');
+			let result = document.querySelector('#result');
+
+			// Sides of the dice
+			let sides = [1, 2, 3, 4, 5, 6];
+
+			/**
+			 * Randomly shuffle an array
+			 * https://stackoverflow.com/a/2450976/1293256
+			 * @param  {Array} array The array to shuffle
+			 * @return {String}      The first item in the shuffled array
+			 */
+			function shuffle (array) {
+
+				let currentIndex = array.length;
+				let temporaryValue, randomIndex;
+
+				// While there remain elements to shuffle...
+				while (0 !== currentIndex) {
+					// Pick a remaining element...
+					randomIndex = Math.floor(Math.random() * currentIndex);
+					currentIndex -= 1;
+
+					// And swap it with the current element.
+					temporaryValue = array[currentIndex];
+					array[currentIndex] = array[randomIndex];
+					array[randomIndex] = temporaryValue;
+				}
+
+				return array;
+
+			}
+
+			/**
+			 * Shuffles the dice array and use the first value
+			 */
+			function roll () {
+				shuffle(sides);
+				result.textContent = `You rolled a ${sides[0]}`;
+			}
+
+			// Listen for rolls and show the result
+			dice.addEventListener('click', roll);
+		</script>
+	</body>
+</html>
